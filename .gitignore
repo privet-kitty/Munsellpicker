@@ -1,0 +1,7 @@
+/bin/
+*.dat
+*~
+*.jar
+*.exe
+*.log
+*.xml
