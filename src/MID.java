@@ -97,4 +97,9 @@ public class MID {
 		return hvc1000ToSpec(getHVC1000(hex));
 	}
 
+	public String getMunsellString(int hex) {
+		String[] spec = getMunsellSpec(hex);
+		return String.format("%s %s/%s", spec[0], spec[1], spec[2]);
+	}
+
 }

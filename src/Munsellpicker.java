@@ -2,12 +2,18 @@ import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.PointerInfo;
 import java.awt.Rectangle;
 import java.awt.Robot;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -39,11 +45,15 @@ public class Munsellpicker extends JFrame {
 	JTextField hsvHField;
 	JTextField hsvSField;
 	JTextField hsvVField;
-
+	JButton munsellCopyButton;
+	JButton rgbCopyButton;
+	JButton hsvCopyButton;
+	Robot robot;
+	Point point;
 
 
 	public static void main(String args[]) {
-		midPath = "srgbd65.dat";
+		midPath = "srgb-d65.dat";
 		mid = new MID(midPath);
 
 		Munsellpicker frame = new Munsellpicker ();
@@ -51,7 +61,7 @@ public class Munsellpicker extends JFrame {
 	}
 
 	Munsellpicker () {
-		//System.out.println(Arrays.toString(mid.getHVC1000(0xFF00FF)));
+		CopyButtonListener copyButtonListener = new CopyButtonListener();
 
 		setTitle("Munsellpicker (" + midPath +")");
 		setBounds(100, 100, 450, 330);
@@ -60,46 +70,72 @@ public class Munsellpicker extends JFrame {
 		//Font labelFont = new JLabel().getFont().deriveFont(14.0f);
 		setFont(fieldFont);
 
-		//JPanel primaryPanel = new JPanel();
-		//primaryPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
 		// southBoxes include Munsell, RGB and HSV indicators.
 		JPanel southBoxes = new JPanel();
 		GridLayout boxesLayout = new GridLayout(1, 3);
 		southBoxes.setLayout(boxesLayout);
-		//boxes.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
+		// Layout
+		GridBagLayout boxLayout = new GridBagLayout();
 
-		GridLayout boxLayout = new GridLayout(4, 2);
+		GridBagConstraints coord1 = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0,
+			GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0);
+		GridBagConstraints coord2 = new GridBagConstraints(1, 0, 1, 1, 1.0, 1.0,
+				GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0);
+		GridBagConstraints coord3 = new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0,
+				GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0);
+		GridBagConstraints coord4 = new GridBagConstraints(1, 1, 1, 1, 1.0, 1.0,
+				GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0);
+		GridBagConstraints coord5 = new GridBagConstraints(0, 2, 1, 1, 1.0, 1.0,
+				GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0);
+		GridBagConstraints coord6 = new GridBagConstraints(1, 2, 1, 1, 1.0, 1.0,
+				GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0);
+		GridBagConstraints coord7 = new GridBagConstraints(0, 3, 2, 1, 1.0, 1.0,
+				GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0);
 
 		// construct the Munsell box
 		JPanel munsellBox = new JPanel();
-		munsellBox.setBorder(new TitledBorder("Munsell (" + getPreffix(midPath) + ")"));
+		munsellBox.setBorder(new TitledBorder("Munsell (" + getPrefix(midPath) + ")"));
 		munsellBox.setLayout(boxLayout);
 		munsellBox.setFont(fieldFont);
 
-		munsellBox.add(new JLabel("H", JLabel.CENTER));
-		munsellHField = new JTextField("N");
+		JLabel munsellHLabel = new JLabel("H", JLabel.CENTER);
+		boxLayout.setConstraints(munsellHLabel, coord1);
+		munsellBox.add(munsellHLabel);
+		munsellHField = new JTextField("10.0");
 		munsellHField.setHorizontalAlignment(JTextField.CENTER);
 		munsellHField.setFont(fieldFont);
 		munsellHField.setEditable(false);
 		munsellHField.setBackground(Color.WHITE);
-		munsellBox.add(munsellHField, BorderLayout.CENTER);
-		munsellBox.add(new JLabel("V", JLabel.CENTER));
+		boxLayout.setConstraints(munsellHField, coord2);
+		munsellBox.add(munsellHField);
+
+
+		JLabel munsellVLabel = new JLabel("V", JLabel.CENTER);
+		boxLayout.setConstraints(munsellVLabel, coord3);
+		munsellBox.add(munsellVLabel);
 		munsellVField = new JTextField("10.0");
 		munsellVField.setHorizontalAlignment(JTextField.CENTER);
 		munsellVField.setFont(fieldFont);
 		munsellVField.setEditable(false);
 		munsellVField.setBackground(Color.WHITE);
+		boxLayout.setConstraints(munsellVField, coord4);
 		munsellBox.add(munsellVField);
-		munsellBox.add(new JLabel("C", JLabel.CENTER));
+
+		JLabel munsellCLabel = new JLabel("C", JLabel.CENTER);
+		boxLayout.setConstraints(munsellCLabel, coord5);
+		munsellBox.add(munsellCLabel);
 		munsellCField = new JTextField("0.0");
 		munsellCField.setHorizontalAlignment(JTextField.CENTER);
 		munsellCField.setFont(fieldFont);
 		munsellCField.setEditable(false);
 		munsellCField.setBackground(Color.WHITE);
+		boxLayout.setConstraints(munsellCField, coord6);
 		munsellBox.add(munsellCField);
-		JButton munsellCopyButton = new JButton("Copy (M)");
+
+		munsellCopyButton = new JButton("Copy (M)");
+		munsellCopyButton.addActionListener(copyButtonListener);
+		boxLayout.setConstraints(munsellCopyButton, coord7);
 		munsellBox.add(munsellCopyButton);
 
 		southBoxes.add(munsellBox);
@@ -109,84 +145,111 @@ public class Munsellpicker extends JFrame {
 		JPanel rgbBox = new JPanel();
 		rgbBox.setBorder(new TitledBorder("RGB"));
 		rgbBox.setLayout(boxLayout);
+		rgbBox.setFont(fieldFont);
 
-		rgbBox.add(new JLabel("R", JLabel.CENTER));
+		JLabel rgbRLabel = new JLabel("R", JLabel.CENTER);
+		boxLayout.setConstraints(rgbRLabel, coord1);
+		rgbBox.add(rgbRLabel);
 		rgbRField = new JTextField("255");
 		rgbRField.setHorizontalAlignment(JTextField.CENTER);
 		rgbRField.setFont(fieldFont);
 		rgbRField.setEditable(false);
 		rgbRField.setBackground(Color.WHITE);
-		rgbBox.add(rgbRField, BorderLayout.CENTER);
-		rgbBox.add(new JLabel("G", JLabel.CENTER));
+		boxLayout.setConstraints(rgbRField, coord2);
+		rgbBox.add(rgbRField);
+
+		JLabel rgbGLabel = new JLabel("G", JLabel.CENTER);
+		boxLayout.setConstraints(rgbGLabel, coord3);
+		rgbBox.add(rgbGLabel);
 		rgbGField = new JTextField("255");
 		rgbGField.setHorizontalAlignment(JTextField.CENTER);
 		rgbGField.setFont(fieldFont);
 		rgbGField.setEditable(false);
 		rgbGField.setBackground(Color.WHITE);
+		boxLayout.setConstraints(rgbGField, coord4);
 		rgbBox.add(rgbGField);
-		rgbBox.add(new JLabel("B", JLabel.CENTER));
+
+		JLabel rgbBLabel = new JLabel("B", JLabel.CENTER);
+		boxLayout.setConstraints(rgbBLabel, coord5);
+		rgbBox.add(rgbBLabel);
 		rgbBField = new JTextField("255");
 		rgbBField.setHorizontalAlignment(JTextField.CENTER);
 		rgbBField.setFont(fieldFont);
 		rgbBField.setEditable(false);
 		rgbBField.setBackground(Color.WHITE);
+		boxLayout.setConstraints(rgbBField, coord6);
 		rgbBox.add(rgbBField);
-		//JButton rgbCopyButton = new JButton("Copy (R)");
-		//rgbBox.add(rgbCopyButton);
+
+		rgbCopyButton = new JButton("Copy (R)");
+		rgbCopyButton.addActionListener(copyButtonListener);
+		boxLayout.setConstraints(rgbCopyButton, coord7);
+		rgbBox.add(rgbCopyButton);
 
 		southBoxes.add(rgbBox);
+
 
 		// construct the HSV box
 		JPanel hsvBox = new JPanel();
 		hsvBox.setBorder(new TitledBorder("HSV"));
 		hsvBox.setLayout(boxLayout);
+		hsvBox.setFont(fieldFont);
 
-		hsvBox.add(new JLabel("H", JLabel.CENTER));
-		hsvHField = new JTextField("0");
+		JLabel hsvHLabel = new JLabel("H", JLabel.CENTER);
+		boxLayout.setConstraints(hsvHLabel, coord1);
+		hsvBox.add(hsvHLabel);
+		hsvHField = new JTextField("360");
 		hsvHField.setHorizontalAlignment(JTextField.CENTER);
 		hsvHField.setFont(fieldFont);
 		hsvHField.setEditable(false);
 		hsvHField.setBackground(Color.WHITE);
-		hsvBox.add(hsvHField, BorderLayout.CENTER);
-		hsvBox.add(new JLabel("S", JLabel.CENTER));
+		boxLayout.setConstraints(hsvHField, coord2);
+		hsvBox.add(hsvHField);
+
+		JLabel hsvSLabel = new JLabel("S", JLabel.CENTER);
+		boxLayout.setConstraints(hsvSLabel, coord3);
+		hsvBox.add(hsvSLabel);
 		hsvSField = new JTextField("0");
 		hsvSField.setHorizontalAlignment(JTextField.CENTER);
 		hsvSField.setFont(fieldFont);
 		hsvSField.setEditable(false);
 		hsvSField.setBackground(Color.WHITE);
+		boxLayout.setConstraints(hsvSField, coord4);
 		hsvBox.add(hsvSField);
-		hsvBox.add(new JLabel("V", JLabel.CENTER));
-		hsvVField = new JTextField("100");
+
+		JLabel hsvVLabel = new JLabel("V", JLabel.CENTER);
+		boxLayout.setConstraints(hsvVLabel, coord5);
+		hsvBox.add(hsvVLabel);
+		hsvVField = new JTextField("0");
 		hsvVField.setHorizontalAlignment(JTextField.CENTER);
 		hsvVField.setFont(fieldFont);
 		hsvVField.setEditable(false);
 		hsvVField.setBackground(Color.WHITE);
+		boxLayout.setConstraints(hsvVField, coord6);
 		hsvBox.add(hsvVField);
-		//JButton hsvCopyButton = new JButton("Dummy");
-		//hsvBox.add(hsvCopyButton);
+
+		hsvCopyButton = new JButton("Copy (H)");
+		hsvCopyButton.addActionListener(copyButtonListener);
+		boxLayout.setConstraints(hsvCopyButton, coord7);
+		hsvBox.add(hsvCopyButton);
 
 		southBoxes.add(hsvBox);
 
 
 		getContentPane().add(southBoxes, BorderLayout.SOUTH);
 
+		// north boxes
+		JPanel northBoxes = new JPanel();
+		northBoxes.setLayout(boxesLayout);
 
 		TimerListener timerlistener = new TimerListener();
 		timer = new Timer (50, timerlistener);
 		timer.start();
-
-
-
-		// north boxes
-		JPanel northBoxes = new JPanel();
-		northBoxes.setLayout(boxesLayout);
 
 		// pointed color
 		JPanel pointedColorBox = new JPanel();
 		pointedColorLabel = new JLabel(new ImageIcon(timerlistener.getPointedColorImg()));
 		pointedColorBox.add(pointedColorLabel);
 		northBoxes.add(pointedColorBox);
-
 
 
 		// Loupe
@@ -200,11 +263,21 @@ public class Munsellpicker extends JFrame {
 		northBoxes.add(buttonsBox);
 
 		getContentPane().add(northBoxes, BorderLayout.NORTH);
-
-
 	}
 
-	public static String getPreffix(String fileName) {
+	public Color getPointedColor(PointerInfo pointerInfo) {
+		if (pointerInfo != null) {
+			point = pointerInfo.getLocation();
+
+			int mouseX = (int) Math.round(point.getX());
+			int mouseY = (int) Math.round(point.getY());
+
+			return robot.getPixelColor(mouseX, mouseY);
+		} else
+			return new Color(0, 0, 0);
+	}
+
+	public static String getPrefix(String fileName) {
 	    if (fileName == null)
 	        return null;
 	    int point = fileName.lastIndexOf(".");
@@ -240,13 +313,11 @@ public class Munsellpicker extends JFrame {
 
 
 	public class TimerListener implements ActionListener {
-		Point point;
 		BufferedImage sourceImg;
 		BufferedImage loupeImg;
 		int[] loupePixels;
 		BufferedImage pointedColorImg;
 		int[] pointedColorPixels;
-		Robot robot;
 		int radius;
 		int scale;
 		int diameter;
@@ -292,28 +363,23 @@ public class Munsellpicker extends JFrame {
 
 		@Override
 		public void actionPerformed (ActionEvent e) {
-			PointerInfo pointerinfo = MouseInfo.getPointerInfo();
-			if (pointerinfo != null) {
-				point = pointerinfo.getLocation();
+			PointerInfo pointerInfo = MouseInfo.getPointerInfo();
+			Color pointedColor = getPointedColor(pointerInfo);
+			int hex = pointedColor.getRGB();
+			for(int i=0; i<pixelSize; i++)
+				pointedColorPixels[i] = hex;
+			pointedColorImg.setRGB(0, 0, width, width, pointedColorPixels,  0, width);
+			pointedColorLabel.setIcon(new ImageIcon(pointedColorImg));
 
-				int mouseX = (int) Math.round(point.getX());
-				int mouseY = (int) Math.round(point.getY());
+			int mouseX = (int) Math.round(point.getX());
+			int mouseY = (int) Math.round(point.getY());
 
-				Color pointedColor = robot.getPixelColor(mouseX, mouseY);
-				int hex = pointedColor.getRGB();
-				for(int i=0; i<pixelSize; i++)
-					pointedColorPixels[i] = hex;
-				pointedColorImg.setRGB(0, 0, width, width, pointedColorPixels,  0, width);
-				pointedColorLabel.setIcon(new ImageIcon(pointedColorImg));
+			drawNeighborhood(mouseX, mouseY);
+			loupeLabel.setIcon(new ImageIcon(loupeImg));
 
-				drawNeighborhood(mouseX, mouseY);
-				loupeLabel.setIcon(new ImageIcon(loupeImg));
-
-				updateMunsellBox(pointedColor);
-				updateRGBBox(pointedColor);
-				updateHSVBox(pointedColor);
-			}
-
+			updateMunsellBox(pointedColor);
+			updateRGBBox(pointedColor);
+			updateHSVBox(pointedColor);
 		}
 
 		// pg must be (radius*2+1)*scale pixels square.
@@ -362,4 +428,24 @@ public class Munsellpicker extends JFrame {
 		}
 
 	}
+
+	public class CopyButtonListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			PointerInfo pointerInfo = MouseInfo.getPointerInfo();
+			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+			int col = getPointedColor(pointerInfo).getRGB() & 0x00ffffff;
+
+			if (e.getSource() == munsellCopyButton) {
+				String munsellstr = mid.getMunsellString(col);
+				StringSelection selection = new StringSelection(munsellstr);
+				clipboard.setContents(selection, selection);
+			}
+			if (e.getSource() == rgbCopyButton) {
+				String hexstr = String.format("%06x", col);
+				StringSelection selection = new StringSelection(hexstr);
+				clipboard.setContents(selection, selection);
+			}
+		}
+	}
 }
+
