@@ -27,8 +27,6 @@ import javax.swing.JTextField;
 import javax.swing.Timer;
 import javax.swing.border.TitledBorder;
 
-import hugo.Colortool;
-
 
 public class Munsellpicker extends JFrame {
 	static MID mid;
