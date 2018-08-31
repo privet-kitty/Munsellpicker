@@ -4,5 +4,6 @@
 *.jar
 *.exe
 *.log
+*.zip
 
 /target/
