@@ -2,8 +2,8 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>C:\Users\hugo\Documents\workspace\Munsellpicker\Munsellpicker.jar</jar>
-  <outfile>C:\Users\hugo\Documents\workspace\Munsellpicker\Munsellpicker-windows.exe</outfile>
+  <jar>target/Munsellpicker.jar</jar>
+  <outfile>Munsellpicker-windows.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
