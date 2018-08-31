@@ -59,7 +59,6 @@ public class Munsellpicker extends JFrame {
 		mid = new MID(midPath);
 
 		Munsellpicker frame = new Munsellpicker ();
-		frame.setFocusable(true);
 		frame.setVisible(true);
 	}
 
@@ -67,12 +66,13 @@ public class Munsellpicker extends JFrame {
 		CopyButtonListener copyButtonListener = new CopyButtonListener();
 		MyKeyListener myKeyListener = new MyKeyListener();
 		this.addKeyListener(myKeyListener);
+		this.setFocusable(true);
 
 		setTitle("Munsellpicker (" + midPath +")");
-		setBounds(100, 100, 450, 330);
+		setBounds(100, 100, 450, 340);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Font fieldFont= new JTextField().getFont().deriveFont(16.0f);
-		//Font labelFont = new JLabel().getFont().deriveFont(14.0f);
+		Font labelFont = new JLabel().getFont().deriveFont(14.0f);
 		setFont(fieldFont);
 
 		// southBoxes include Munsell, RGB and HSV indicators.
@@ -100,11 +100,14 @@ public class Munsellpicker extends JFrame {
 
 		// construct the Munsell box
 		JPanel munsellBox = new JPanel();
-		munsellBox.setBorder(new TitledBorder("Munsell (" + getPrefix(midPath) + ")"));
+		TitledBorder munsellTitle = new TitledBorder("Munsell");
+		munsellTitle.setTitleFont(labelFont);
+		munsellBox.setBorder(munsellTitle);
 		munsellBox.setLayout(boxLayout);
 		munsellBox.setFont(fieldFont);
 
 		JLabel munsellHLabel = new JLabel("H", JLabel.CENTER);
+		munsellHLabel.setFont(labelFont);
 		boxLayout.setConstraints(munsellHLabel, coord1);
 		munsellBox.add(munsellHLabel);
 		munsellHField = new JTextField("10.0");
@@ -117,6 +120,7 @@ public class Munsellpicker extends JFrame {
 
 
 		JLabel munsellVLabel = new JLabel("V", JLabel.CENTER);
+		munsellVLabel.setFont(labelFont);
 		boxLayout.setConstraints(munsellVLabel, coord3);
 		munsellBox.add(munsellVLabel);
 		munsellVField = new JTextField("10.0");
@@ -128,6 +132,7 @@ public class Munsellpicker extends JFrame {
 		munsellBox.add(munsellVField);
 
 		JLabel munsellCLabel = new JLabel("C", JLabel.CENTER);
+		munsellCLabel.setFont(labelFont);
 		boxLayout.setConstraints(munsellCLabel, coord5);
 		munsellBox.add(munsellCLabel);
 		munsellCField = new JTextField("0.0");
@@ -148,11 +153,14 @@ public class Munsellpicker extends JFrame {
 
 		// construct the RGB box
 		JPanel rgbBox = new JPanel();
-		rgbBox.setBorder(new TitledBorder("RGB"));
+		TitledBorder rgbTitle = new TitledBorder("RGB");
+		rgbTitle.setTitleFont(labelFont);
+		rgbBox.setBorder(rgbTitle);
 		rgbBox.setLayout(boxLayout);
 		rgbBox.setFont(fieldFont);
 
 		JLabel rgbRLabel = new JLabel("R", JLabel.CENTER);
+		rgbRLabel.setFont(labelFont);
 		boxLayout.setConstraints(rgbRLabel, coord1);
 		rgbBox.add(rgbRLabel);
 		rgbRField = new JTextField("255");
@@ -164,6 +172,7 @@ public class Munsellpicker extends JFrame {
 		rgbBox.add(rgbRField);
 
 		JLabel rgbGLabel = new JLabel("G", JLabel.CENTER);
+		rgbGLabel.setFont(labelFont);
 		boxLayout.setConstraints(rgbGLabel, coord3);
 		rgbBox.add(rgbGLabel);
 		rgbGField = new JTextField("255");
@@ -175,6 +184,7 @@ public class Munsellpicker extends JFrame {
 		rgbBox.add(rgbGField);
 
 		JLabel rgbBLabel = new JLabel("B", JLabel.CENTER);
+		rgbBLabel.setFont(labelFont);
 		boxLayout.setConstraints(rgbBLabel, coord5);
 		rgbBox.add(rgbBLabel);
 		rgbBField = new JTextField("255");
@@ -195,11 +205,15 @@ public class Munsellpicker extends JFrame {
 
 		// construct the HSV box
 		JPanel hsvBox = new JPanel();
-		hsvBox.setBorder(new TitledBorder("HSV"));
+		TitledBorder hsvTitle = new TitledBorder("HSV");
+		hsvTitle.setTitleFont(labelFont);
+		hsvBox.setBorder(hsvTitle);
+		hsvBox.setBorder(hsvTitle);
 		hsvBox.setLayout(boxLayout);
 		hsvBox.setFont(fieldFont);
 
 		JLabel hsvHLabel = new JLabel("H", JLabel.CENTER);
+		hsvHLabel.setFont(labelFont);
 		boxLayout.setConstraints(hsvHLabel, coord1);
 		hsvBox.add(hsvHLabel);
 		hsvHField = new JTextField("360");
@@ -211,6 +225,7 @@ public class Munsellpicker extends JFrame {
 		hsvBox.add(hsvHField);
 
 		JLabel hsvSLabel = new JLabel("S", JLabel.CENTER);
+		hsvSLabel.setFont(labelFont);
 		boxLayout.setConstraints(hsvSLabel, coord3);
 		hsvBox.add(hsvSLabel);
 		hsvSField = new JTextField("0");
@@ -222,6 +237,7 @@ public class Munsellpicker extends JFrame {
 		hsvBox.add(hsvSField);
 
 		JLabel hsvVLabel = new JLabel("V", JLabel.CENTER);
+		hsvVLabel.setFont(labelFont);
 		boxLayout.setConstraints(hsvVLabel, coord5);
 		hsvBox.add(hsvVLabel);
 		hsvVField = new JTextField("0");
@@ -332,11 +348,11 @@ public class Munsellpicker extends JFrame {
 		TimerListener() {
 			point = new Point(10, 10);
 			try {
-			    robot = new Robot();
-			  } catch (AWTException e) {
-			    e.printStackTrace();
-			    System.exit(-1);
-			  }
+				robot = new Robot();
+			} catch (AWTException e) {
+				e.printStackTrace();
+				System.exit(-1);
+			}
 
 			reconstructImages(6, 9);
 		}
@@ -406,10 +422,11 @@ public class Munsellpicker extends JFrame {
 
 		  // indicate center
 		  col = sourceImg.getRGB(radius, radius);
-		  //System.out.println("col: " + Colortool.red(col));
 		  int rectCol;
-		  if(Colortool.getRoughLuminance(col) >= 128) rectCol = 0x000000;
-		  else rectCol = 0xFFFFFF;
+		  if(Colortool.getRoughLuminance(col) >= 128)
+			  rectCol = 0x000000;
+		  else
+			  rectCol = 0xFFFFFF;
 		  drawRectInPixels(loupePixels, width, width, radius*scale, radius*scale, scale, scale, rectCol);
 
 		  loupeImg.setRGB(0, 0, width, width, loupePixels,  0, width);
