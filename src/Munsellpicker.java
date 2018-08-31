@@ -69,7 +69,7 @@ public class Munsellpicker extends JFrame {
 		this.setFocusable(true);
 
 		setTitle("Munsellpicker (" + midPath +")");
-		setBounds(100, 100, 450, 340);
+		setBounds(100, 100, 450, 335);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Font fieldFont= new JTextField().getFont().deriveFont(16.0f);
 		Font labelFont = new JLabel().getFont().deriveFont(14.0f);
@@ -381,7 +381,6 @@ public class Munsellpicker extends JFrame {
 			pointedColorPixels = new int[pixelSize];
 		}
 
-		@Override
 		public void actionPerformed (ActionEvent e) {
 			PointerInfo pointerInfo = MouseInfo.getPointerInfo();
 			Color pointedColor = getPointedColor(pointerInfo);
