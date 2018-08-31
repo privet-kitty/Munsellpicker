@@ -1,3 +1,4 @@
+package com.privet_kitty;
 public class Colortool {
 
 	/**

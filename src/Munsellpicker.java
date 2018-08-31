@@ -16,6 +16,8 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
@@ -26,6 +28,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.Timer;
 import javax.swing.border.TitledBorder;
+
+import com.privet_kitty.Colortool;
 
 
 public class Munsellpicker extends JFrame {
@@ -55,11 +59,14 @@ public class Munsellpicker extends JFrame {
 		mid = new MID(midPath);
 
 		Munsellpicker frame = new Munsellpicker ();
+		frame.setFocusable(true);
 		frame.setVisible(true);
 	}
 
 	Munsellpicker () {
 		CopyButtonListener copyButtonListener = new CopyButtonListener();
+		MyKeyListener myKeyListener = new MyKeyListener();
+		this.addKeyListener(myKeyListener);
 
 		setTitle("Munsellpicker (" + midPath +")");
 		setBounds(100, 100, 450, 330);
@@ -77,7 +84,7 @@ public class Munsellpicker extends JFrame {
 		GridBagLayout boxLayout = new GridBagLayout();
 
 		GridBagConstraints coord1 = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0,
-			GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0);
+				GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0);
 		GridBagConstraints coord2 = new GridBagConstraints(1, 0, 1, 1, 1.0, 1.0,
 				GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0);
 		GridBagConstraints coord3 = new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0,
@@ -89,7 +96,7 @@ public class Munsellpicker extends JFrame {
 		GridBagConstraints coord6 = new GridBagConstraints(1, 2, 1, 1, 1.0, 1.0,
 				GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0);
 		GridBagConstraints coord7 = new GridBagConstraints(0, 3, 2, 1, 1.0, 1.0,
-				GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 0, 0);
+				GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(1, 1, 1, 1), 1, 1);
 
 		// construct the Munsell box
 		JPanel munsellBox = new JPanel();
@@ -332,7 +339,6 @@ public class Munsellpicker extends JFrame {
 			  }
 
 			reconstructImages(6, 9);
-
 		}
 
 		public BufferedImage getLoupeImg () {
@@ -431,18 +437,47 @@ public class Munsellpicker extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			PointerInfo pointerInfo = MouseInfo.getPointerInfo();
 			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-			int col = getPointedColor(pointerInfo).getRGB() & 0x00ffffff;
+			Color col = getPointedColor(pointerInfo);
 
 			if (e.getSource() == munsellCopyButton) {
-				String munsellstr = mid.getMunsellString(col);
+				String munsellstr = mid.getMunsellString(col.getRGB());
 				StringSelection selection = new StringSelection(munsellstr);
 				clipboard.setContents(selection, selection);
 			}
 			if (e.getSource() == rgbCopyButton) {
-				String hexstr = String.format("%06x", col);
+				String hexstr = String.format("%06x", col.getRGB() & 0x00ffffff);
 				StringSelection selection = new StringSelection(hexstr);
 				clipboard.setContents(selection, selection);
 			}
+			if (e.getSource() == hsvCopyButton) {
+				float[] hsv = Color.RGBtoHSB(col.getRed(), col.getGreen(), col.getBlue(), null);
+				String hsvstr = String.format("%d %d %d", Math.round(hsv[0]*360), Math.round(hsv[1]*100), Math.round(hsv[2]*100));
+				StringSelection selection = new StringSelection(hsvstr);
+				clipboard.setContents(selection, selection);
+			}
+		}
+	}
+
+	public class MyKeyListener implements KeyListener {
+		public void keyPressed(KeyEvent e) {
+			char key = e.getKeyChar();
+			switch(key) {
+			case 'm':
+				munsellCopyButton.doClick();
+				break;
+			case 'r':
+				rgbCopyButton.doClick();
+				break;
+			case 'h':
+				hsvCopyButton.doClick();
+				break;
+			}
+		}
+
+		public void keyReleased(KeyEvent e){
+		}
+
+		public void keyTyped(KeyEvent e){
 		}
 	}
 }
