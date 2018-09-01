@@ -1,6 +1,6 @@
 #!/bin/sh
-srgb_dat=srgb-d65.dat
-adobergb_dat=adobergb-d65.dat
+srgb_dat=sRGB-D65.dat
+adobergb_dat=AdobeRGB-d65.dat
 suffix=
 
 if [ ! -e ${srgb_dat} ] || [ ! -e ${adobergb_dat} ]; then
@@ -16,4 +16,4 @@ mvn clean package
 # Make .exe for Windows
 launch4jc Munsellpicker.jar.xml
 
-zip -jr Munsellpicker${suffix}.zip *.exe target/Munsellpicker.jar *.md *.dat
+zip -jr Munsellpicker${suffix}-bin.zip *.exe target/Munsellpicker.jar *.md *.dat
