@@ -7,33 +7,30 @@ import java.nio.channels.FileChannel;
 
 public class MID {
 	static final int possibleColors = 16777216;
-	int[] midArray;
+	final int[] midArray = new int[possibleColors];
 	static String[] mhueTable = {"R", "YR", "Y", "GY", "G", "BG", "B", "PB", "P", "RP"};
 	boolean isPreciseValue;
 	boolean isPreciseHue;
 
 
-	MID (String path) {
-		midArray = new int[possibleColors];
+	MID (String path) throws IOException {
+		loadData(path);
+		isPreciseValue = false;
+		isPreciseHue = false;
+	}
+
+	public void loadData(String path) throws IOException{
 		FileInputStream stream = null;
-		  try {
-		    stream = new FileInputStream(path);
-		    FileChannel inChannel = stream.getChannel();
+			stream = new FileInputStream(path);
+			FileChannel inChannel = stream.getChannel();
 
-		    ByteBuffer buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, 0, inChannel.size());
-		    buffer.order(ByteOrder.BIG_ENDIAN);
-		    IntBuffer intBuffer = buffer.asIntBuffer();
-		    intBuffer.get(midArray);
-		  } catch (IOException e) {
-		    e.printStackTrace();
-		  } finally {
-		    if (stream != null)
-		      try { stream.close(); }
-		      catch (IOException e) { e.printStackTrace(); }
-		  }
+			ByteBuffer buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, 0, inChannel.size());
+			buffer.order(ByteOrder.BIG_ENDIAN);
+			IntBuffer intBuffer = buffer.asIntBuffer();
+			intBuffer.get(midArray);
 
-		  isPreciseValue = false;
-		  isPreciseHue = false;
+			if (stream != null)
+				stream.close();
 	}
 
 	public void enablePreiciseValue() {
@@ -50,11 +47,11 @@ public class MID {
 	}
 
 	int[] decodeHVC1000 (int hex) {
-		  int[] hvc = new int[3];
-		  hvc[0] = (hex >> 20) & 1023; //0b1111111111
-		  hvc[1] = (hex >> 10) & 1023;
-		  hvc[2] = hex & 1023;
-		  return hvc;
+		int[] hvc = new int[3];
+		hvc[0] = (hex >> 20) & 1023; //0b1111111111
+		hvc[1] = (hex >> 10) & 1023;
+		hvc[2] = hex & 1023;
+		return hvc;
 	}
 
 	public int[] getHVC1000 (int hex) {
