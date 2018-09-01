@@ -7,8 +7,8 @@
 (defparameter *current-path* *load-pathname*)
 
 (defparameter *task-lst*
-  `(("srgb-d65" . ,dufy:+srgb+)
-    ("adobergb-d65" . ,dufy:+adobe+)))
+  `(("sRGB-D65" . ,dufy:+srgb+)
+    ("AdobeRGB-D65" . ,dufy:+adobe+)))
 
 (defun do-task (basename rgbspace)
   (let* ((filename (concatenate 'string basename ".dat"))

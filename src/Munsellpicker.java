@@ -20,6 +20,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.Arrays;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -32,12 +34,14 @@ import javax.swing.Timer;
 import javax.swing.border.TitledBorder;
 
 import com.privet_kitty.Colortool;
+import com.qiita.JeJeNeNo.Utils;
 
 
 public class Munsellpicker extends JFrame {
 	MID mid;
 	String[] midFiles;
 	int currentMidIndex;
+	String defaultMidFile = "sRGB-D65.dat";
 	Timer timer;
 	JLabel pointedColorLabel;
 	JLabel loupeLabel;
@@ -57,14 +61,28 @@ public class Munsellpicker extends JFrame {
 	Point point;
 
 
-	public static void main(String args[]) {
+	public static void main(String[] args) {
 		Munsellpicker frame = new Munsellpicker ();
 		frame.setVisible(true);
 	}
 
 	Munsellpicker () {
-		midFiles = new String[] {"srgb-d65.dat", "adobergb-d65.dat"};
-		currentMidIndex = 0;
+		// find and read inversion data.
+		midFiles = Utils.listUpFiles(Paths.get("."), "dat", false)
+				.stream()
+				.map(file -> file.getName())
+				.toArray(String[]::new);
+		if (midFiles.length == 0) {
+			System.out.println("No .dat files found.");
+			System.exit(1);
+		}
+
+		currentMidIndex = Arrays.asList(midFiles).indexOf(defaultMidFile);
+		if(currentMidIndex == -1) {
+			System.out.println("Coundn't find " + defaultMidFile +". Use " + midFiles[0] + " instead");
+			currentMidIndex = 0;
+		}
+
 		try {
 			mid = new MID(midFiles[currentMidIndex]);
 		} catch (IOException e) {
@@ -72,18 +90,21 @@ public class Munsellpicker extends JFrame {
 			System.exit(1);
 		}
 
+		// make listeners
 		CopyButtonListener copyButtonListener = new CopyButtonListener();
-		MyKeyListener myKeyListener = new MyKeyListener();
+		CopyKeyListener myKeyListener = new CopyKeyListener();
 		this.addKeyListener(myKeyListener);
 		this.setFocusable(true);
 
-		setTitle("Munsellpicker (" + midFiles[currentMidIndex] + ")");
+		// setting the whole frame
+		setTitle("Munsellpicker: " + midFiles[currentMidIndex]);
 		setBounds(100, 100, 450, 335);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Font fieldFont= new JTextField().getFont().deriveFont(16.0f);
 		Font labelFont = new JLabel().getFont().deriveFont(14.0f);
 		setFont(fieldFont);
 
+		// The frame is divided into the two JPanels, northBoxes and southBoxes.
 		// southBoxes include Munsell, RGB and HSV indicators.
 		JPanel southBoxes = new JPanel();
 		GridLayout boxesLayout = new GridLayout(1, 3);
@@ -126,7 +147,6 @@ public class Munsellpicker extends JFrame {
 		munsellHField.setBackground(Color.WHITE);
 		boxLayout.setConstraints(munsellHField, coord2);
 		munsellBox.add(munsellHField);
-
 
 		JLabel munsellVLabel = new JLabel("V", JLabel.CENTER);
 		munsellVLabel.setFont(labelFont);
@@ -263,9 +283,8 @@ public class Munsellpicker extends JFrame {
 		hsvBox.add(hsvCopyButton);
 
 		southBoxes.add(hsvBox);
-
-
 		getContentPane().add(southBoxes, BorderLayout.SOUTH);
+
 
 		// north boxes
 		JPanel northBoxes = new JPanel();
@@ -291,27 +310,29 @@ public class Munsellpicker extends JFrame {
 		// Buttons
 		JPanel buttonsBox = new JPanel();
 		JComboBox<String> midCombo = new JComboBox<String>(midFiles);
+		midCombo.setSelectedIndex(currentMidIndex);
 		midCombo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				int newMidIndex = midCombo.getSelectedIndex();
 				if (newMidIndex != -1) {
 					String newMidFile = midFiles[newMidIndex];
-					System.out.println("loading "+ newMidFile + "...");
+					System.out.println("Loading "+ newMidFile + "...");
 					try { mid.loadData(newMidFile); }
 					catch (IOException e1) {
 						e1.printStackTrace();
-						setTitle("Failed to read " + midFiles[newMidIndex]);
+						String errorMsg = "Failed to read " + midFiles[newMidIndex];
+						System.out.println(errorMsg);
+						setTitle(errorMsg);
 						return;
 					}
-					System.out.println(newMidFile + " successfully loaded");
-					setTitle("Munsellpicker (" + midFiles[newMidIndex] + ")");
+					System.out.println(newMidFile + " successfully loaded.");
+					setTitle("Munsellpicker: " + midFiles[newMidIndex]);
 					currentMidIndex = newMidIndex;
 				}
 			}
 		});
 		buttonsBox.add(midCombo);
 		northBoxes.add(buttonsBox);
-
 		getContentPane().add(northBoxes, BorderLayout.NORTH);
 	}
 
@@ -503,7 +524,7 @@ public class Munsellpicker extends JFrame {
 		}
 	}
 
-	public class MyKeyListener implements KeyListener {
+	public class CopyKeyListener implements KeyListener {
 		public void keyPressed(KeyEvent e) {
 			char key = e.getKeyChar();
 			switch(key) {
