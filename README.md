@@ -1,5 +1,5 @@
 # Munsellpicker
-Musellpicker captures a color under your mouse pointer on the screen and views its Munsell Color code, RGB, and HSV. It runs in most environments as it is built on Java.
+Musellpicker captures a color under your mouse pointer on the screen and views its Munsell Color code, RGB, and HSV. It runs in most environments (Windows, Mac OS, Linux etc.) as it is built on Java.
 
 ![screenshot](screenshot.png "screenshot")
 
@@ -10,7 +10,7 @@ You can get the binary of the latest release on the [release page](https://githu
 If you already have JRE (Java Runtime Environment) in your system, you can run it just by double-clicking `Munsellpicker.jar` or executing in your console:
 
 ```
-$ javaw -jar Munsellpicker.jar
+javaw -jar Munsellpicker.jar
 ```
 If you use windows, it will be better to run `Munsellpicker-windows.exe` instead.
 
