@@ -1,3 +1,4 @@
+package com.privetkitty;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -5,6 +6,11 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 
+/**
+ * MID (Munsell Inversion Data) holds a 64MB binary file and provides a converter from RGB to Munsell.
+ * @author hugo
+ *
+ */
 public class MID {
 	static final int possibleColors = 16777216;
 	final int[] midArray = new int[possibleColors];
@@ -13,6 +19,11 @@ public class MID {
 	boolean isPreciseHue;
 
 
+	/**
+	 * The given file must be 64MB binary data produced by <a href="https://github.com/privet-kitty/munsell-inversion-data">munsell-inversion-data</a>.
+	 * @param path : path of a binary file
+	 * @throws IOException
+	 */
 	MID (String path) throws IOException {
 		loadData(path);
 		isPreciseValue = false;
@@ -48,7 +59,7 @@ public class MID {
 
 	int[] decodeHVC1000 (int hex) {
 		int[] hvc = new int[3];
-		hvc[0] = (hex >> 20) & 1023; //0b1111111111
+		hvc[0] = (hex >> 20) & 1023; // 0b1111111111
 		hvc[1] = (hex >> 10) & 1023;
 		hvc[2] = hex & 1023;
 		return hvc;
@@ -65,7 +76,7 @@ public class MID {
 		if (isPreciseHue)
 			mhueSuffix = ((hvc[0] - mhueNumber*100)/10.0);
 		else
-			mhueSuffix = Math.round((hvc[0] - mhueNumber*100)/5.0)/2.0; //reduce 100 steps to 20 steps
+			mhueSuffix = Math.round((hvc[0] - mhueNumber*100)/5.0)/2.0; // reduce 100 steps to 20 steps
 
 		if (mhueSuffix == 0.0) {
 			--mhueNumber;
