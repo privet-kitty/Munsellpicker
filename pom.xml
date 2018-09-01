@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.privet_kitty.munsellpicker</groupId>
 	<artifactId>Munsellpicker</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>0.1.0-SNAPSHOT</version>
 	<description>Desktop color picker handling Munsell Color System</description>
 	<url>https://github.com/privet-kitty/Munsellpicker</url>
 
@@ -35,7 +35,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>Munsellpicker</mainClass>
+							<mainClass>com.privetkitty.Munsellpicker</mainClass>
 						</manifest>
 					</archive>
 					<appendAssemblyId>false</appendAssemblyId>
