@@ -1,4 +1,5 @@
 package com.privet_kitty;
+
 public class Colortool {
 
 	/**
@@ -28,7 +29,6 @@ public class Colortool {
 		return x;
 	}
 
-
 	public static int mod360 (int x) {
 		int y = x%360;
 		if (y >= 0) return y;
@@ -50,12 +50,12 @@ public class Colortool {
 		return mod360(x-y);
 	}
 
-	//Munsell Kubelka-Munk Toolbox で明度7、彩度8の色相を求めたもの。5Rから。
+	// Hue of Munsell Color (40 colors beginning from 5R) to hue of HSV Color. The value is 7 and the chroma is 8.
 	static int[] hueTable = {
 			3, 10, 15, 21, 26, 32, 37, 42, 48, 53, 58, 65, 75, 92, 114, 141, 154, 161, 165, 170,
 			175, 179, 183, 187, 191, 195, 200, 207, 214, 228, 244, 261, 276, 300, 316, 327, 339, 345, 353, 358
 	};
-	//hueTableの逆引き。長さ360。constructMhueTableで作る。
+	// inversion of hueTable, beginning with H = 0
 	static double[] mhueTable = {
 			354.59999999999997, 356.40000000000003, 358.2, 0.0, 1.2857142857142856, 2.571428571428571, 3.8571428571428568, 5.142857142857142, 6.428571428571429, 7.7142857142857135,
 			9.0, 10.799999999999999, 12.6, 14.4, 16.2, 18.0, 19.5, 21.0, 22.5, 24.0,
@@ -113,7 +113,7 @@ public class Colortool {
 
 	public static void printMhueTable(int[] hTable) {
 		double[] tmpMhueTable = constructMhueTable(hTable);
-				System.out.print("{");
+		System.out.print("{");
 		for(int i =0; i< tmpMhueTable.length; i++) {
 			if(i!=0) System.out.print(", ");
 			if(i%10 == 0) System.out.print("\n");
@@ -255,19 +255,19 @@ public class Colortool {
 
 	//HexからXYZ、D65に従ってY[0, 1]を求める。
 	public static double getY(int col) {
-		  double r, g, b;
-		  //sRGB D65におけるRGB->XYZの変換。Yは光度を表す。
-		  r = linearize(red(col)/255);
-		  g = linearize(green(col)/255);
-		  b = linearize(blue(col)/255);
-		  return 0.212671*r + 0.715160*g + 0.072169*b;
+		double r, g, b;
+		//sRGB D65におけるRGB->XYZの変換。Yは光度を表す。
+		r = linearize(red(col)/255);
+		g = linearize(green(col)/255);
+		b = linearize(blue(col)/255);
+		return 0.212671*r + 0.715160*g + 0.072169*b;
 	}
 
 	//HexからL*の値をもとめる。
 	public static double getLstar(int col) {
-	  //YからL*へ変換する。どの照明においてもwhite pointはY=1なので、D65でもD50でも同じ。
-      double Y = getY(col);
-	  return 116.0 * function_f(Y/D65_WHITE[1]) - 16.0;
+		//YからL*へ変換する。どの照明においてもwhite pointはY=1なので、D65でもD50でも同じ。
+		double Y = getY(col);
+		return 116.0 * function_f(Y/D65_WHITE[1]) - 16.0;
 	}
 
 	static double DELTA = 0.20689655172;
@@ -275,10 +275,10 @@ public class Colortool {
 	static double DELTA3 = 0.00885645167;
 
 	static double function_f (double t) {
-	  if (t > DELTA3)
-	    return Math.pow(t, 0.333333333);
-	  else
-	    return t/(3*DELTA2) + 0.13793103448;
+		if (t > DELTA3)
+			return Math.pow(t, 0.333333333);
+		else
+			return t/(3*DELTA2) + 0.13793103448;
 	}
 
 

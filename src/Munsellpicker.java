@@ -19,9 +19,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -33,8 +35,9 @@ import com.privet_kitty.Colortool;
 
 
 public class Munsellpicker extends JFrame {
-	static MID mid;
-	static String midPath;
+	MID mid;
+	String[] midFiles;
+	int currentMidIndex;
 	Timer timer;
 	JLabel pointedColorLabel;
 	JLabel loupeLabel;
@@ -55,20 +58,26 @@ public class Munsellpicker extends JFrame {
 
 
 	public static void main(String args[]) {
-		midPath = "srgb-d65.dat";
-		mid = new MID(midPath);
-
 		Munsellpicker frame = new Munsellpicker ();
 		frame.setVisible(true);
 	}
 
 	Munsellpicker () {
+		midFiles = new String[] {"srgb-d65.dat", "adobergb-d65.dat"};
+		currentMidIndex = 0;
+		try {
+			mid = new MID(midFiles[currentMidIndex]);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+
 		CopyButtonListener copyButtonListener = new CopyButtonListener();
 		MyKeyListener myKeyListener = new MyKeyListener();
 		this.addKeyListener(myKeyListener);
 		this.setFocusable(true);
 
-		setTitle("Munsellpicker (" + midPath +")");
+		setTitle("Munsellpicker (" + midFiles[currentMidIndex] + ")");
 		setBounds(100, 100, 450, 335);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Font fieldFont= new JTextField().getFont().deriveFont(16.0f);
@@ -281,6 +290,26 @@ public class Munsellpicker extends JFrame {
 
 		// Buttons
 		JPanel buttonsBox = new JPanel();
+		JComboBox<String> midCombo = new JComboBox<String>(midFiles);
+		midCombo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int newMidIndex = midCombo.getSelectedIndex();
+				if (newMidIndex != -1) {
+					String newMidFile = midFiles[newMidIndex];
+					System.out.println("loading "+ newMidFile + "...");
+					try { mid.loadData(newMidFile); }
+					catch (IOException e1) {
+						e1.printStackTrace();
+						setTitle("Failed to read " + midFiles[newMidIndex]);
+						return;
+					}
+					System.out.println(newMidFile + " successfully loaded");
+					setTitle("Munsellpicker (" + midFiles[newMidIndex] + ")");
+					currentMidIndex = newMidIndex;
+				}
+			}
+		});
+		buttonsBox.add(midCombo);
 		northBoxes.add(buttonsBox);
 
 		getContentPane().add(northBoxes, BorderLayout.NORTH);
@@ -299,13 +328,13 @@ public class Munsellpicker extends JFrame {
 	}
 
 	public static String getPrefix(String fileName) {
-	    if (fileName == null)
-	        return null;
-	    int point = fileName.lastIndexOf(".");
-	    if (point != -1) {
-	        return fileName.substring(0, point);
-	    }
-	    return fileName;
+		if (fileName == null)
+			return null;
+		int point = fileName.lastIndexOf(".");
+		if (point != -1) {
+			return fileName.substring(0, point);
+		}
+		return fileName;
 	}
 
 	void updateMunsellBox(Color col) {
@@ -403,32 +432,32 @@ public class Munsellpicker extends JFrame {
 
 		// pg must be (radius*2+1)*scale pixels square.
 		void drawNeighborhood(int centerX, int centerY) {
-		  int col;
-		  sourceImg = robot.createScreenCapture(new Rectangle(centerX-radius, centerY-radius, diameter, diameter));
-		  int[] px = sourceImg.getRGB(0, 0, diameter, diameter, null, 0, diameter);
-		  for(int y= 0; y<diameter; y++) {
-		    int y_mult_diameter = y*diameter;
-		    int wid_mult_y = width*y;
-		    for(int x=0; x<diameter; x++) {
-		      col = px[y_mult_diameter+x];
-		      for(int j=0; j<scale; j++) {
-		        int wid_mult_j = width*j;
-		        for(int i=0; i<scale; i++)
-		          loupePixels[(wid_mult_y + x)*scale + wid_mult_j + i] = col;
-		      }
-		    }
-		  }
+			int col;
+			sourceImg = robot.createScreenCapture(new Rectangle(centerX-radius, centerY-radius, diameter, diameter));
+			int[] px = sourceImg.getRGB(0, 0, diameter, diameter, null, 0, diameter);
+			for(int y= 0; y<diameter; y++) {
+				int y_mult_diameter = y*diameter;
+				int wid_mult_y = width*y;
+				for(int x=0; x<diameter; x++) {
+					col = px[y_mult_diameter+x];
+					for(int j=0; j<scale; j++) {
+						int wid_mult_j = width*j;
+						for(int i=0; i<scale; i++)
+							loupePixels[(wid_mult_y + x)*scale + wid_mult_j + i] = col;
+					}
+				}
+			}
 
-		  // indicate center
-		  col = sourceImg.getRGB(radius, radius);
-		  int rectCol;
-		  if(Colortool.getRoughLuminance(col) >= 128)
-			  rectCol = 0x000000;
-		  else
-			  rectCol = 0xFFFFFF;
-		  drawRectInPixels(loupePixels, width, width, radius*scale, radius*scale, scale, scale, rectCol);
+			// indicate center
+			col = sourceImg.getRGB(radius, radius);
+			int rectCol;
+			if(Colortool.getRoughLuminance(col) >= 128)
+				rectCol = 0x000000;
+			else
+				rectCol = 0xFFFFFF;
+			drawRectInPixels(loupePixels, width, width, radius*scale, radius*scale, scale, scale, rectCol);
 
-		  loupeImg.setRGB(0, 0, width, width, loupePixels,  0, width);
+			loupeImg.setRGB(0, 0, width, width, loupePixels,  0, width);
 		}
 
 		void drawRectInPixels(int[] pixels, int pxWidth, int pxHeight, int x, int y, int w, int h, int hex) {
