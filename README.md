@@ -12,7 +12,7 @@ If you already have JRE (Java Runtime Environment) in your system, you can run i
 ```
 javaw -jar Munsellpicker.jar
 ```
-If you use windows, it will be better to run `Munsellpicker-windows.exe` instead.
+If you use Windows, it will be better to run `Munsellpicker-windows.exe` instead.
 
 If you don't have JRE, you can find it on [java.com](https://java.com/download/). JRE 8 (Ver. 1.8) is recommended.
 
