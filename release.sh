@@ -1,4 +1,8 @@
 #!/bin/sh
+
+# Usage
+# sh release.sh [version number]
+
 srgb_dat=sRGB-D65.dat
 adobergb_dat=AdobeRGB-d65.dat
 suffix=
