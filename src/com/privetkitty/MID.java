@@ -107,7 +107,10 @@ public class MID {
 
 	public String getMunsellString(int hex) {
 		String[] spec = getMunsellSpec(hex);
-		return String.format("%s %s/%s", spec[0], spec[1], spec[2]);
+		if (spec[0] == "N")
+			return String.format("%s %s", spec[0], spec[1]);
+		else
+			return String.format("%s %s/%s", spec[0], spec[1], spec[2]);
 	}
 
 }
